@@ -2,13 +2,15 @@ module Audited
   class Sweeper < ActiveModel::Observer
     observe Audited.audit_class
 
-    def before(controller)
-      self.controller = controller
-      true
-    end
+    attr_accessor :controller
 
-    def after(controller)
-      self.controller = nil
+    def around(controller)
+      begin
+        self.controller = controller
+        yield
+      ensure
+        self.controller = nil
+      end
     end
 
     def before_create(audit)
