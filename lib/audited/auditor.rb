@@ -96,6 +96,9 @@ module Audited
     end
 
     module AuditedInstanceMethods
+      require 'openssl'
+      require 'base64'
+
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
@@ -200,8 +203,10 @@ module Audited
 
       def audit_update
         unless (changes = audited_changes).empty? && audit_comment.blank?
+          hash  = OpenSSL::Digest.new('SHA256', changes)
+          changes_hash = Base64.encode64(hash)
           write_audit(:action => 'update', :audited_changes => changes,
-                      :comment => audit_comment)
+                      :comment => audit_comment, :audited_changes_hash => changes_hash)
         end
       end
 
