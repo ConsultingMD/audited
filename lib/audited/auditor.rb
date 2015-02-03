@@ -203,7 +203,7 @@ module Audited
 
       def audit_update
         unless (changes = audited_changes).empty? && audit_comment.blank?
-          hash  = OpenSSL::Digest.new('SHA256', changes)
+          hash = OpenSSL::Digest.new('SHA256', changes.to_s).digest
           changes_hash = Base64.encode64(hash)
           write_audit(:action => 'update', :audited_changes => changes,
                       :comment => audit_comment, :audited_changes_hash => changes_hash)
