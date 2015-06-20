@@ -70,7 +70,6 @@ module Audited
           attr_accessible :audit_comment
         end
 
-        has_many :audits, :as => :auditable, :class_name => Audited.audit_class.name
         Audited.audit_class.audited_class_names << self.to_s
 
         after_create  :audit_create if !options[:on] || (options[:on] && options[:on].include?(:create))
@@ -102,6 +101,15 @@ module Audited
       # Temporarily turns off auditing while saving.
       def save_without_auditing
         without_auditing { save }
+      end
+
+      # Replacement for badly-generated has_many accessor (now that we use strings for some
+      # audited models, but not all). Rails3-only hack
+      def audits
+        id_to_s = self.send(self.class.primary_key).to_s
+        # Stay conformant with the STI / polymorphic association Rails
+        # bug/feature by using base_class
+        Audited.audit_class.where("auditable_id" => id_to_s, "auditable_type" => self.class.base_class.name)
       end
 
       # Executes the block with the auditing callbacks disabled.
