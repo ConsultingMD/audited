@@ -5,6 +5,22 @@ Audited [![Build Status](https://secure.travis-ci.org/collectiveidea/audited.png
 
 Audited currently (4.x) works with Rails 4. For Rails 3, use gem version 3.0 or see the [3.0-stable branch](https://github.com/collectiveidea/audited/tree/3.0-stable).
 
+# Grand Rounds Fork Notes:
+This gem is locked to the 3.0 branch to maintain compatibility with Rails 3. The gem has been forked to fix an issue with strings being used as Audited models. See notes below (per Rick Cobb):
+
+```ruby
+# Replacement for badly-generated has_many accessor (now that we use strings for some
+# audited models, but not all). Rails3-only hack
+def audits
+  id_to_s = self.send(self.class.primary_key).to_s
+  # Stay conformant with the STI / polymorphic association Rails
+  # bug/feature by using base_class
+  Audited.audit_class.where("auditable_id" => id_to_s, "auditable_type" => self.class.base_class.name)
+end
+```
+
+We will be able to convert to the 4.0 branch on the main repo when we upgrade to Rails 4 (or beyond!).
+
 ## Supported Rubies
 
 Audited supports and is [tested against](http://travis-ci.org/collectiveidea/audited) the following Ruby versions:
